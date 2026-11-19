@@ -32,15 +32,10 @@ jobs:
       - run: cargo test --all-features
 
   # Check formatting with rustfmt
+  # rustfmt output does not depend on the host architecture.
   rust-formatting:
-    strategy:
-      fail-fast: false
-      matrix:
-        runner:
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
-    name: cargo fmt (${{ matrix.runner }})
-    runs-on: ${{ matrix.runner }}
+    name: cargo fmt (ubuntu-24.04)
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
