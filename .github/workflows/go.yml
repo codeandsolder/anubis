@@ -63,7 +63,7 @@ jobs:
 
       - name: Start Playwright server
         run: |
-          # Detach all streams: an unredirected background server holds
+          # Detach all streams: a background server inheriting stdout holds
           # the Actions step's output pipe open until the server exits.
           nohup npx playwright@1.62.1 run-server --port 9001 </dev/null >"$RUNNER_TEMP/playwright-server.log" 2>&1 &
           server_pid=$!
