@@ -63,10 +63,11 @@ jobs:
 
       - name: Build Packages
         run: |
-          if ! git describe --tags >/dev/null 2>&1; then
-            export FORCE_GIT_VERSION="$(cat VERSION)-dev.$(git rev-parse --short HEAD)"
-          fi
-          go tool yeet
+          # Yeet's git-describe parser rejects non-tagged commit strings
+          # (vX.Y.Z-N-gSHA), falling back to invalid "devel".
+          # Use a distinct valid SemVer prerelease for each unstable CI run.
+          version="$(tr -d '\r\n' < VERSION)"
+          FORCE_GIT_VERSION="$version-pre$GITHUB_RUN_NUMBER" go tool yeet
 
       - name: Verify MSI contents
         env:

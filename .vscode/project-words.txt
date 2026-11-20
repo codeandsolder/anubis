@@ -155,6 +155,7 @@ ellenjoe
 emacs
 embe
 enbyware
+endgroup
 envoyproxy
 eral
 ETCDIR
@@ -388,6 +389,7 @@ nicksnyder
 nikandfor
 nobots
 NOFILE
+nohup
 nolint
 NONINFRINGEMENT
 nontrapping
