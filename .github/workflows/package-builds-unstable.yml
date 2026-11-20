@@ -63,6 +63,9 @@ jobs:
 
       - name: Build Packages
         run: |
+          if ! git describe --tags >/dev/null 2>&1; then
+            export FORCE_GIT_VERSION="$(cat VERSION)-dev.$(git rev-parse --short HEAD)"
+          fi
           go tool yeet
 
       - name: Verify MSI contents
