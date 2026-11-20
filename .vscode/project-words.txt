@@ -72,6 +72,7 @@ caninetools
 canonialheader
 Cardyb
 CAs
+cdylib
 celchecker
 celphase
 cerr
@@ -154,6 +155,7 @@ ellenjoe
 emacs
 embe
 enbyware
+endgroup
 envoyproxy
 eral
 ETCDIR
@@ -574,6 +576,7 @@ unbreakdocker
 Uncacheable
 unfeatures
 unifiedjs
+uninlined
 unintrusive
 unipromos
 unixhttpd
