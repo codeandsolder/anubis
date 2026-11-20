@@ -68,7 +68,8 @@ jobs:
           nohup npx playwright@1.62.1 run-server --port 9001 </dev/null >"$RUNNER_TEMP/playwright-server.log" 2>&1 &
           server_pid=$!
           for attempt in {1..60}; do
-            if (echo >/dev/tcp/127.0.0.1/9001) 2>/dev/null; then
+            # Playwright binds ::1 by default on the hosted runner.
+            if (echo >/dev/tcp/::1/9001) 2>/dev/null; then
               echo "Playwright server ready after $attempt checks"
               exit 0
             fi
