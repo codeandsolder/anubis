@@ -141,8 +141,8 @@ dnserr
 DNSTTL
 DOCDIR
 domainhere
-dont
 DONT
+dont
 dracula
 dronebl
 droneblresponse
@@ -279,8 +279,8 @@ inbox
 ingressed
 inlines
 inp
-installdir
 INSTALLDIR
+installdir
 internets
 iocaine
 IPASN
