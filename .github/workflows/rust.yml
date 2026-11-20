@@ -29,7 +29,14 @@ jobs:
         with:
           cache: false
           target: wasm32-unknown-unknown
+      - name: Setup mandatory sccache
+        uses: codeandsolder/ci-workflows/.github/actions/setup-sccache@9d478bdbfd4acd0e1a2c015d1ff1d11688eda572 # main
+
       - run: cargo test --all-features
+
+      - name: Finalize mandatory sccache
+        if: always()
+        uses: codeandsolder/ci-workflows/.github/actions/finalize-sccache@9d478bdbfd4acd0e1a2c015d1ff1d11688eda572 # main
 
   # Check formatting with rustfmt
   # rustfmt output does not depend on the host architecture.

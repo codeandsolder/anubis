@@ -481,6 +481,7 @@ Samsung
 sarif
 sas
 sasl
+sccache
 screenshots
 searchbot
 searx

@@ -41,6 +41,9 @@ jobs:
         with:
           cache: false
           target: wasm32-unknown-unknown
+      - name: Setup mandatory sccache
+        uses: codeandsolder/ci-workflows/.github/actions/setup-sccache@9d478bdbfd4acd0e1a2c015d1ff1d11688eda572 # main
+
       - name: Setup `wasmtime`
         uses: bytecodealliance/actions/wasmtime/setup@9152e710e9f7182e4c29ad218e4f335a7b203613 # v1.1.3
 
@@ -67,3 +70,7 @@ jobs:
           echo "docker pull ${DOCKER_IMAGE}"
         env:
           DOCKER_IMAGE: ${{ steps.build.outputs.docker_image }}
+
+      - name: Finalize mandatory sccache
+        if: always()
+        uses: codeandsolder/ci-workflows/.github/actions/finalize-sccache@9d478bdbfd4acd0e1a2c015d1ff1d11688eda572 # main
