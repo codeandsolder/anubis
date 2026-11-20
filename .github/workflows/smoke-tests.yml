@@ -16,26 +16,35 @@ concurrency:
 
 jobs:
   smoke-test:
+    name: smoke-test (${{ matrix.batch }})
     strategy:
+      fail-fast: false
       matrix:
-        test:
-          - default-config-macro
-          - docker-registry
-          - double_slash
-          - forced-language
-          - git-clone
-          - git-push
-          - gitweb
-          - healthcheck
-          - i18n
-          - lightpanda
-          - log-file
-          - nginx
-          - palemoon/amd64
-          #- palemoon/i386
-          - robots_txt
-          - traefik
-          - wildcard-match
+        include:
+          - batch: service
+            cases: |
+              default-config-macro
+              docker-registry
+              healthcheck
+              log-file
+          - batch: proxy
+            cases: |
+              double_slash
+              gitweb
+              nginx
+              traefik
+          - batch: browser
+            cases: |
+              forced-language
+              i18n
+              lightpanda
+              palemoon/amd64
+          - batch: routing
+            cases: |
+              git-clone
+              git-push
+              robots_txt
+              wildcard-match
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -62,18 +71,32 @@ jobs:
         run: |
           go install ./utils/cmd/...
 
-      - name: Run test
+      - name: Run each smoke case in the batch
+        shell: bash
+        env:
+          SMOKE_CASES: ${{ matrix.cases }}
         run: |
-          cd test/${{ matrix.test }}
-          backoff-retry --try-count 10 ./test.sh
+          failed=0
+          while IFS= read -r test_case; do
+            [[ -z "$test_case" ]] && continue
+            echo "::group::Smoke test $test_case"
+            if ! (
+              cd "test/$test_case"
+              # Some upstream tests leave Docker Compose services running.
+              # Stop them before the next case in this shared runner slot.
+              trap 'if [[ -f compose.yml || -f compose.yaml || -f docker-compose.yml || -f docker-compose.yaml ]]; then docker compose down --remove-orphans; fi' EXIT
+              backoff-retry --try-count 10 ./test.sh
+            ); then
+              echo "::error::Smoke test failed: $test_case"
+              failed=1
+            fi
+            echo "::endgroup::"
+          done <<< "$SMOKE_CASES"
+          exit "$failed"
 
-      - name: Sanitize artifact name
-        if: always()
-        run: echo "ARTIFACT_NAME=${{ matrix.test }}" | sed 's|/|-|g' >> $GITHUB_ENV
-
-      - name: Upload artifact
+      - name: Upload batch artifacts (retains per-case directories)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: test/${{ matrix.test }}/var
+          name: smoke-${{ matrix.batch }}
+          path: test/**/var

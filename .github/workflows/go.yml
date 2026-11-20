@@ -54,10 +54,34 @@ jobs:
         run: |
           npm ci
 
-      - name: install playwright browsers
+      - name: Install Playwright OS dependencies
+        run: npx playwright@1.62.1 install-deps
+
+      - name: Install Playwright browsers (cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright@1.62.1 install
+
+      - name: Start Playwright server
         run: |
-          npx playwright@1.62.1 install --with-deps
-          npx playwright@1.62.1 run-server --port 9001 &
+          # Detach all streams: a background server inheriting stdout holds
+          # the Actions step's output pipe open until the server exits.
+          nohup npx playwright@1.62.1 run-server --port 9001 </dev/null >"$RUNNER_TEMP/playwright-server.log" 2>&1 &
+          server_pid=$!
+          for attempt in {1..60}; do
+            # Playwright binds ::1 by default on the hosted runner.
+            if (echo >/dev/tcp/::1/9001) 2>/dev/null; then
+              echo "Playwright server ready after $attempt checks"
+              exit 0
+            fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              cat "$RUNNER_TEMP/playwright-server.log" >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Playwright server did not start on port 9001" >&2
+          cat "$RUNNER_TEMP/playwright-server.log" >&2
+          exit 1
 
       - name: Build
         run: npm run build
